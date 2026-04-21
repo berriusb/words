@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>책 제목 & 작가 매칭 게임</title>
+    <title>책 제목 & 작가 매칭 게임 (중복 제거)</title>
+    
     <style>
-        /* CSS 스타일 정의 */
-        
         /* --- 색상 변수 정의 (메인 컬러 반영) --- */
         :root {
             --main-color: #0080FF; /* 요청하신 메인 파란색 */
@@ -51,10 +50,10 @@
 
         /* 공통 버튼 스타일 (메인 컬러 반영 및 3D 효과) */
         .btn-primary {
-            background-color: var(--main-color); /* 시작 버튼 색상도 파란색으로 */
+            background-color: var(--main-color);
             color: white;
             border: none;
-            border-bottom: 4px solid var(--main-color-active); /* 클릭 효과용 어두운 파랑 */
+            border-bottom: 4px solid var(--main-color-active);
             border-radius: 12px;
             padding: 14px 28px;
             font-size: 1.1em;
@@ -66,12 +65,12 @@
         }
 
         .btn-primary:hover {
-            background-color: var(--main-color-hover); /* 호버 시 파란색 유지하되 밝게 */
+            background-color: var(--main-color-hover);
         }
 
         .btn-primary:active {
             border-bottom-width: 0;
-            transform: translateY(4px); /* 클릭 시 들어가는 효과 */
+            transform: translateY(4px);
         }
 
         /* --- 화면 섹션 스타일 --- */
@@ -113,7 +112,7 @@
             border: 2px solid var(--card-border);
             border-bottom-width: 4px; /* 약간의 3D 효과 */
             border-radius: 16px;
-            padding: 20px;
+            padding: 15px; /* 패딩 약간 줄임 (글자 길어질 것에 대비) */
             text-align: center;
             cursor: pointer;
             transition: all 0.1s ease;
@@ -121,10 +120,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 90px;
+            min-height: 80px; /* 최소 높이 약간 줄임 */
             user-select: none;
             font-weight: 500;
             font-size: 1.05em;
+            word-break: keep-all; /* 단어 단위 줄바꿈 */
         }
 
         .card:hover:not(.matched):not(.selected) {
@@ -134,10 +134,10 @@
 
         /* 선택된 카드 스타일 (메인 컬러 반영) */
         .card.selected {
-            background-color: var(--main-color-light); /* 연한 메인 컬러 배경 */
-            border-color: var(--main-color); /* 메인 컬러 테두리 */
-            color: var(--main-color-active); /* 약간 어두운 메인 컬러 텍스트 */
-            box-shadow: 0 4px 10px rgba(0, 128, 255, 0.15); /* 푸른색 그림자 */
+            background-color: var(--main-color-light);
+            border-color: var(--main-color);
+            color: var(--main-color-active);
+            box-shadow: 0 4px 10px rgba(0, 128, 255, 0.15);
         }
 
         /* 매칭된 카드 스타일 (투명해지며 클릭 불가) */
@@ -173,7 +173,7 @@
 
         /* 결과 메시지 스타일 (메인 컬러 반영) */
         #result-screen h2 {
-            color: var(--main-color); /* 완료 메시지도 메인 컬러로 */
+            color: var(--main-color);
             margin-bottom: 10px;
             font-size: 2em;
         }
@@ -190,8 +190,8 @@
                 gap: 10px;
             }
             .card {
-                padding: 15px;
-                min-height: 70px;
+                padding: 12px;
+                min-height: 60px;
                 font-size: 0.95em;
                 border-radius: 12px;
             }
@@ -205,7 +205,7 @@
 
     <div id="start-screen" class="screen">
         <h1>책 & 작가 맞추기</h1>
-        <p class="description">듀오링고 스타일로 즐기는 문학 퀴즈!<br>책 제목과 올바른 작가를 매칭해 보세요.</p>
+        <p class="description">듀오링고 스타일로 즐기는 문학 퀴즈!<br>중복 없이 고유한 항목들을 매칭해 보세요.</p>
         <button id="start-btn" class="btn-primary">게임 시작</button>
     </div>
 
@@ -220,23 +220,41 @@
     </div>
 
     <script>
-        // JS 로직 정의 (변경 없음)
-
-        // 1. 게임 데이터 (책 제목과 작가 짝)
-        const bookPairs = [
-            { title: "달려라, 아비", author: "김애란" },
-            { title: "두근두근 내 인생", author: "김애란" },
-            { title: "채식주의자", author: "한강" },
-            { title: "소년이 온다", author: "한강" },
-            // { title: "파친코", author: "이민진" },
-            // { title: "저주토끼", author: "정보라" }
+        // --- 1. 고유한 게임 데이터 정의 (중복 제거 핵심) ---
+        
+        // 고유한 책 제목 배열
+        const bookTitles = [
+            "달려라, 아비",
+            "두근두근 내 인생",
+            "채식주의자",
+            "소년이 온다",
+            "파친코",
+            "저주토끼"
         ];
 
-        let cards = []; 
-        let firstSelectedCard = null; 
-        let secondSelectedCard = null; 
-        let matchedCount = 0; 
-        let isChecking = false; 
+        // 고유한 작가 배열 (중복 없음)
+        const authors = [
+            "김애란",
+            "한강",
+            "이민진", 
+            "정보라"
+        ];
+
+        // 책 제목 -> 정답 작가 매핑 데이터 (매칭 확인용)
+        const bookToAuthorMap = {
+            "달려라, 아비": "김애란",
+            "두근두근 내 인생": "김애란",
+            "채식주의자": "한강",
+            "소년이 온다": "한강",
+            "파친코": "이민진",
+            "저주토끼": "정보라"
+        };
+
+        let cards = []; // 전체 카드 데이터를 담을 배열
+        let firstSelectedCard = null; // 첫 번째로 선택한 카드 DOM 요소
+        let secondSelectedCard = null; // 두 번째로 선택한 카드 DOM 요소
+        let matchedTitlesCount = 0; // 맞춘 책 제목의 개수 (게임 종료 조건)
+        let isChecking = false; // 매칭 확인 중 클릭 방지 플래그
 
         // DOM 요소들
         const startScreen = document.getElementById('start-screen');
@@ -276,31 +294,41 @@
             cards = [];
             firstSelectedCard = null;
             secondSelectedCard = null;
-            matchedCount = 0;
+            matchedTitlesCount = 0;
             isChecking = false;
 
-            bookPairs.forEach((pair, index) => {
+            // --- 데이터 준비: 고유한 제목과 고유한 작가 카드를 각각 생성 ---
+            
+            // 제목 카드 생성
+            bookTitles.forEach(title => {
                 cards.push({
-                    id: index, 
-                    text: pair.title,
+                    text: title,
                     type: 'title'
                 });
+            });
+
+            // 작가 카드 생성 (중복 없음)
+            authors.forEach(author => {
                 cards.push({
-                    id: index,
-                    text: pair.author,
+                    text: author,
                     type: 'author'
                 });
             });
 
+            // 카드 셔플
             shuffle(cards);
 
+            // HTML 카드 요소 생성 및 보드에 추가
             cards.forEach(cardData => {
                 const cardEl = document.createElement('div');
                 cardEl.classList.add('card');
-                cardEl.dataset.id = cardData.id; 
-                cardEl.dataset.type = cardData.type; 
+                cardEl.dataset.text = cardData.text; // HTML data 속성에 텍스트 저장
+                cardEl.dataset.type = cardData.type; // HTML data 속성에 타입 저장
                 cardEl.textContent = cardData.text;
+                
+                // 클릭 이벤트 리스너 등록
                 cardEl.addEventListener('click', handleCardClick);
+                
                 gameBoard.appendChild(cardEl);
             });
         }
@@ -309,71 +337,54 @@
         function handleCardClick(e) {
             const clickedCard = e.currentTarget;
 
+            // 클릭 무시 조건: 
             if (clickedCard.classList.contains('matched') || 
                 clickedCard.classList.contains('selected') || 
                 isChecking) {
                 return;
             }
 
+            // 첫 번째 카드 선택
             if (!firstSelectedCard) {
                 firstSelectedCard = clickedCard;
                 firstSelectedCard.classList.add('selected');
             } 
+            // 두 번째 카드 선택
             else {
+                // 타입이 같은 카드를 연속으로 선택했을 경우, 첫 번째 선택을 교체
+                if (firstSelectedCard.dataset.type === clickedCard.dataset.type) {
+                    firstSelectedCard.classList.remove('selected');
+                    firstSelectedCard = clickedCard;
+                    firstSelectedCard.classList.add('selected');
+                    return;
+                }
+
                 secondSelectedCard = clickedCard;
                 secondSelectedCard.classList.add('selected');
-                isChecking = true; 
+                isChecking = true; // 클릭 방지 시작
+
+                // 매칭 확인
                 checkMatch();
             }
         }
 
-        // 6. 매칭 확인 함수
+        // 6. 매칭 확인 함수 (중복 제거에 맞춰 로직 변경)
         function checkMatch() {
-            const id1 = firstSelectedCard.dataset.id;
-            const id2 = secondSelectedCard.dataset.id;
-            const type1 = firstSelectedCard.dataset.type;
-            const type2 = secondSelectedCard.dataset.type;
+            let titleCard, authorCard;
 
-            if (id1 === id2 && type1 !== type2) {
-                setTimeout(() => {
-                    firstSelectedCard.classList.replace('selected', 'matched');
-                    secondSelectedCard.classList.replace('selected', 'matched');
-                    
-                    resetSelection();
-                    matchedCount++;
-
-                    if (matchedCount === bookPairs.length) {
-                        endGame();
-                    }
-                }, 300); 
+            // 선택된 카드 중 어느 것이 제목이고 어느 것이 작가인지 구분
+            if (firstSelectedCard.dataset.type === 'title') {
+                titleCard = firstSelectedCard;
+                authorCard = secondSelectedCard;
             } else {
-                setTimeout(() => {
-                    firstSelectedCard.classList.add('incorrect');
-                    secondSelectedCard.classList.add('incorrect');
-
-                    setTimeout(() => {
-                        if(firstSelectedCard) firstSelectedCard.classList.remove('selected', 'incorrect');
-                        if(secondSelectedCard) secondSelectedCard.classList.remove('selected', 'incorrect');
-                        resetSelection();
-                    }, 400); 
-                }, 100);
+                titleCard = secondSelectedCard;
+                authorCard = firstSelectedCard;
             }
-        }
 
-        // 7. 선택 상태 초기화 함수
-        function resetSelection() {
-            firstSelectedCard = null;
-            secondSelectedCard = null;
-            isChecking = false; 
-        }
+            const selectedTitle = titleCard.dataset.text;
+            const selectedAuthor = authorCard.dataset.text;
+            const correctAuthor = bookToAuthorMap[selectedTitle]; // 선택된 제목의 정답 작가 찾기
 
-        // 8. 게임 종료 함수
-        function endGame() {
-            setTimeout(() => {
-                showScreen(resultScreen);
-            }, 800); 
-        }
-
-    </script>
-</body>
-</html>
+            // --- 짝이 맞는지 확인 조건 (새로운 로직) ---
+            // 선택된 제목의 정답 작가와 선택된 작가 카드의 텍스트가 일치해야 함
+            if (selectedAuthor === correctAuthor) {
