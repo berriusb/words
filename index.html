@@ -6,9 +6,26 @@
     <title>책 제목 & 작가 매칭 게임</title>
     <style>
         /* CSS 스타일 정의 */
+        
+        /* --- 색상 변수 정의 (메인 컬러 반영) --- */
+        :root {
+            --main-color: #0080FF; /* 요청하신 메인 컬러 */
+            --main-color-hover: #3399FF; /* 호버 시 약간 밝게 */
+            --main-color-active: #0066CC; /* 클릭 시 약간 어둡게 */
+            --main-color-light: #E6F2FF; /* 선택된 카드 배경용 아주 연한 파랑 */
+            
+            --bg-color: #f0f2f5;
+            --text-color-primary: #333;
+            --text-color-secondary: #666;
+            --card-bg: white;
+            --card-border: #ddd;
+            --incorrect-color: #ea2b2b; /* 틀렸을 때 빨간색 (유지) */
+            --incorrect-bg: #ffefef;
+        }
+
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f0f2f5;
+            background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -17,27 +34,27 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            color: var(--text-color-primary);
         }
 
         h1 {
-            color: #333;
             margin-bottom: 10px;
             text-align: center;
         }
 
         .description {
-            color: #666;
+            color: var(--text-color-secondary);
             margin-bottom: 30px;
             text-align: center;
             max-width: 400px;
         }
 
-        /* 공통 버튼 스타일 (듀오링고 느낌의 초록색 버튼) */
+        /* 공통 버튼 스타일 (메인 컬러 반영 및 3D 효과) */
         .btn-primary {
-            background-color: #58cc02;
+            background-color: var(--main-color);
             color: white;
             border: none;
-            border-bottom: 4px solid #50af02; /* 3D 효과 */
+            border-bottom: 4px solid var(--main-color-active); /* 3D 효과 피벗 */
             border-radius: 12px;
             padding: 14px 28px;
             font-size: 1.1em;
@@ -49,7 +66,7 @@
         }
 
         .btn-primary:hover {
-            background-color: #61df02;
+            background-color: var(--main-color-hover);
         }
 
         .btn-primary:active {
@@ -82,7 +99,7 @@
             text-align: center;
         }
 
-        /* --- 게임 보드 및 카드 스타일 (기존과 동일) --- */
+        /* --- 게임 보드 및 카드 스타일 (메인 컬러 반영) --- */
         #game-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr); /* 4열 */
@@ -92,8 +109,8 @@
         }
 
         .card {
-            background-color: white;
-            border: 2px solid #ddd;
+            background-color: var(--card-bg);
+            border: 2px solid var(--card-border);
             border-bottom-width: 4px; /* 약간의 3D 효과 */
             border-radius: 16px;
             padding: 20px;
@@ -115,283 +132,7 @@
             background-color: #fafafa;
         }
 
-        /* 선택된 카드 스타일 (듀오링고 느낌의 파란색) */
+        /* 선택된 카드 스타일 (메인 컬러 반영) */
         .card.selected {
-            background-color: #ddf4ff;
-            border-color: #1cb0f6;
-            color: #1899d6;
-            box-shadow: 0 4px 10px rgba(28, 176, 246, 0.2);
-        }
-
-        /* 매칭된 카드 스타일 (투명해지며 클릭 불가) */
-        .card.matched {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-            transform: scale(0.9);
-        }
-
-        /* 틀렸을 때 흔들리는 애니메이션 */
-        .card.incorrect {
-            animation: shake 0.4s ease-in-out;
-            border-color: #ffc1c1;
-            background-color: #ffefef;
-            color: #ea2b2b;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
-
-        /* 제목 카드와 작가 카드를 시각적으로 약간 다르게 구분 (선택 사항) */
-        .card[data-type="title"] {
-            color: #222;
-        }
-        .card[data-type="author"] {
-            color: #555;
-            font-style: italic;
-        }
-
-        /* 결과 메시지 스타일 */
-        #result-screen h2 {
-            color: #58cc02;
-            margin-bottom: 10px;
-            font-size: 2em;
-        }
-        #result-screen p {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.2em;
-        }
-
-        /* 반응형 레이아웃: 화면이 작아지면 2열로 변경 */
-        @media (max-width: 600px) {
-            #game-board {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .card {
-                padding: 15px;
-                min-height: 70px;
-                font-size: 0.95em;
-                border-radius: 12px;
-            }
-            #result-screen h2 {
-                font-size: 1.5em;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div id="start-screen" class="screen">
-        <h1>책 & 작가 맞추기</h1>
-        <p class="description">듀오링고 스타일로 즐기는 문학 퀴즈!<br>책 제목과 올바른 작가를 매칭해 보세요.</p>
-        <button id="start-btn" class="btn-primary">게임 시작</button>
-    </div>
-
-    <div id="game-screen" class="screen">
-        <div id="game-board"></div>
-    </div>
-
-    <div id="result-screen" class="screen">
-        <h2>대단해요! 🎉</h2>
-        <p>모든 문학 짝꿍을 찾았습니다.</p>
-        <button id="restart-btn" class="btn-primary">다시 하기</button>
-    </div>
-
-    <script>
-        // JS 로직 정의
-
-        // 1. 게임 데이터 (책 제목과 작가 짝)
-        // 4개~6개 정도가 적당합니다.
-        const bookPairs = [
-            { title: "달려라, 아비", author: "김애란" },
-            { title: "두근두근 내 인생", author: "김애란" },
-            { title: "채식주의자", author: "한강" },
-            { title: "소년이 온다", author: "한강" },
-            // 데이터를 더 추가하려면 주석을 해제하세요.
-            // { title: "파친코", author: "이민진" },
-            // { title: "저주토끼", author: "정보라" }
-        ];
-
-        let cards = []; // 전체 카드 데이터를 담을 배열
-        let firstSelectedCard = null; // 첫 번째로 선택한 카드 DOM 요소
-        let secondSelectedCard = null; // 두 번째로 선택한 카드 DOM 요소
-        let matchedCount = 0; // 맞춘 짝의 개수
-        let isChecking = false; // 매칭 확인 중 클릭 방지 플래그
-
-        // DOM 요소들
-        const startScreen = document.getElementById('start-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const resultScreen = document.getElementById('result-screen');
-        const gameBoard = document.getElementById('game-board');
-        
-        const startBtn = document.getElementById('start-btn');
-        const restartBtn = document.getElementById('restart-btn');
-
-        // 버튼 이벤트 리스너 등록
-        startBtn.addEventListener('click', startGame);
-        restartBtn.addEventListener('click', startGame); // 다시 하기도 게임 시작 함수 호출
-
-        // 2. 배열을 무작위로 섞는 함수 (Fisher-Yates Shuffle)
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        // 3. 화면 전환 함수
-        function showScreen(screenToShow) {
-            // 모든 화면 숨김
-            startScreen.style.display = 'none';
-            gameScreen.style.display = 'none';
-            resultScreen.style.display = 'none';
-            
-            // 요청된 화면만 표시 (flex 레이아웃 유지)
-            screenToShow.style.display = 'flex';
-        }
-
-        // 4. 게임 시작 및 초기화 함수
-        function startGame() {
-            // 화면 전환: 게임 화면으로
-            showScreen(gameScreen);
-
-            // 게임 논리 초기화
-            gameBoard.innerHTML = ''; // 기존 카드 제거
-            cards = [];
-            firstSelectedCard = null;
-            secondSelectedCard = null;
-            matchedCount = 0;
-            isChecking = false;
-
-            // 데이터 준비: 제목 카드와 작가 카드를 분리하여 생성
-            bookPairs.forEach((pair, index) => {
-                // 제목 카드 데이터
-                cards.push({
-                    id: index, // 매칭 확인용 고유 ID (같은 짝은 같은 ID)
-                    text: pair.title,
-                    type: 'title'
-                });
-                // 작가 카드 데이터
-                cards.push({
-                    id: index,
-                    text: pair.author,
-                    type: 'author'
-                });
-            });
-
-            // 카드 셔플
-            shuffle(cards);
-
-            // HTML 카드 요소 생성 및 보드에 추가
-            cards.forEach(cardData => {
-                const cardEl = document.createElement('div');
-                cardEl.classList.add('card');
-                cardEl.dataset.id = cardData.id; // HTML data 속성에 ID 저장
-                cardEl.dataset.type = cardData.type; // HTML data 속성에 타입 저장
-                cardEl.textContent = cardData.text;
-                
-                // 클릭 이벤트 리스너 등록
-                cardEl.addEventListener('click', handleCardClick);
-                
-                gameBoard.appendChild(cardEl);
-            });
-        }
-
-        // 5. 카드 클릭 핸들러 함수
-        function handleCardClick(e) {
-            const clickedCard = e.currentTarget;
-
-            // 클릭 무시 조건: 
-            // 1. 이미 매칭된 카드
-            // 2. 이미 선택된 카드
-            // 3. 현재 매칭 확인 중 (애니메이션 재생 중)
-            if (clickedCard.classList.contains('matched') || 
-                clickedCard.classList.contains('selected') || 
-                isChecking) {
-                return;
-            }
-
-            // 첫 번째 카드 선택
-            if (!firstSelectedCard) {
-                firstSelectedCard = clickedCard;
-                firstSelectedCard.classList.add('selected');
-            } 
-            // 두 번째 카드 선택
-            else {
-                secondSelectedCard = clickedCard;
-                secondSelectedCard.classList.add('selected');
-                isChecking = true; // 클릭 방지 시작
-
-                // 매칭 확인
-                checkMatch();
-            }
-        }
-
-        // 6. 매칭 확인 함수
-        function checkMatch() {
-            const id1 = firstSelectedCard.dataset.id;
-            const id2 = secondSelectedCard.dataset.id;
-            const type1 = firstSelectedCard.dataset.type;
-            const type2 = secondSelectedCard.dataset.type;
-
-            // 짝이 맞는지 확인 조건:
-            // 1. 고유 ID가 같아야 함
-            // 2. 카드의 타입이 서로 달라야 함 (제목 vs 작가)
-            if (id1 === id2 && type1 !== type2) {
-                // 매칭 성공
-                setTimeout(() => {
-                    firstSelectedCard.classList.replace('selected', 'matched');
-                    secondSelectedCard.classList.replace('selected', 'matched');
-                    
-                    resetSelection();
-                    matchedCount++;
-
-                    // 모든 짝을 다 맞췄는지 확인
-                    if (matchedCount === bookPairs.length) {
-                        endGame();
-                    }
-                }, 300); // 듀오링고처럼 약간의 박자를 둠
-            } else {
-                // 매칭 실패
-                setTimeout(() => {
-                    // 시각적 피드백 (틀림 표시 및 흔들림)
-                    firstSelectedCard.classList.add('incorrect');
-                    secondSelectedCard.classList.add('incorrect');
-
-                    // 0.4초 후 선택 해제 및 스타일 초기화
-                    setTimeout(() => {
-                        if(firstSelectedCard) firstSelectedCard.classList.remove('selected', 'incorrect');
-                        if(secondSelectedCard) secondSelectedCard.classList.remove('selected', 'incorrect');
-                        resetSelection();
-                    }, 400); 
-                }, 100);
-            }
-        }
-
-        // 7. 선택 상태 초기화 함수
-        function resetSelection() {
-            firstSelectedCard = null;
-            secondSelectedCard = null;
-            isChecking = false; // 클릭 방지 해제
-        }
-
-        // 8. 게임 종료 함수
-        function endGame() {
-            setTimeout(() => {
-                // 결과 화면으로 전환
-                showScreen(resultScreen);
-            }, 800); // 마지막 카드가 사라지는 애니메이션 후 표시
-        }
-
-        // 페이지 로드 시 특별히 JS로 할 일은 없음.
-        // CSS에서 #start-screen이 flex로 되어 있어 시작 화면이 보임.
-
-    </script>
-</body>
-</html>
+            background-color: var(--main-color-light); /* 연한 메인 컬러 배경 */
+            border-color: var(--main-color); /* 메인 컬러 테두
