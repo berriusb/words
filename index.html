@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사락 문학 퀴즈 (중복 제거)</title>
+    <title>책 제목 & 작가 매칭 게임 (중복 제거)</title>
     
     <style>
         /* --- 색상 변수 정의 (메인 컬러 반영) --- */
@@ -39,16 +39,13 @@
         h1 {
             margin-bottom: 10px;
             text-align: center;
-            font-size: 2.5em; /* 타이틀 크기 키움 */
         }
 
         .description {
             color: var(--text-color-secondary);
-            margin-bottom: 40px; /* 여백 늘림 */
+            margin-bottom: 30px;
             text-align: center;
-            max-width: 500px; /* 너비 늘림 */
-            font-size: 1.1em; /* 폰트 크기 키움 */
-            line-height: 1.6; /* 줄 간격 조절 */
+            max-width: 400px;
         }
 
         /* 공통 버튼 스타일 (메인 컬러 반영 및 3D 효과) */
@@ -56,10 +53,10 @@
             background-color: var(--main-color);
             color: white;
             border: none;
-            border-bottom: 5px solid var(--main-color-active); /* 3D 효과 피벗 */
-            border-radius: 14px; /* 테두리 둥글게 */
-            padding: 16px 32px; /* 패딩 늘림 */
-            font-size: 1.2em; /* 폰트 크기 키움 */
+            border-bottom: 4px solid var(--main-color-active);
+            border-radius: 12px;
+            padding: 14px 28px;
+            font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.1s ease;
@@ -73,7 +70,7 @@
 
         .btn-primary:active {
             border-bottom-width: 0;
-            transform: translateY(5px); /* 클릭 시 들어가는 효과 피벗 */
+            transform: translateY(4px);
         }
 
         /* --- 화면 섹션 스타일 --- */
@@ -82,7 +79,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 900px; /* 최대 너비 늘림 */
+            max-width: 800px;
         }
 
         /* 시작 화면 */
@@ -101,42 +98,38 @@
             text-align: center;
         }
 
-        /* --- 게임 보드 및 카드 스타일 (메인 컬러 반영 및 모바일 우선 배치) --- */
+        /* --- 게임 보드 및 카드 스타일 (메인 컬러 반영) --- */
         #game-board {
             display: grid;
-            /* 모바일 환경에서는 2열 배치를 기본으로 설정하여 카드가 너무 작아지지 않도록 함 */
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; /* 간격 넓힘 */
-            width: 100%; /* 너비 꽉 차게 */
-            margin-top: 30px; /* 여백 늘림 */
-            padding: 0 10px; /* 측면 패딩 추가 */
-            box-sizing: border-box;
+            grid-template-columns: repeat(4, 1fr); /* 4열 */
+            gap: 15px;
+            width: 90%;
+            margin-top: 20px;
         }
 
         .card {
             background-color: var(--card-bg);
-            border: 3px solid var(--card-border); /* 테두리 굵게 */
-            border-bottom-width: 6px; /* 약간의 3D 효과 피벗 */
-            border-radius: 18px; /* 테두리 둥글게 */
-            padding: 18px; /* 패딩 늘림 */
+            border: 2px solid var(--card-border);
+            border-bottom-width: 4px; /* 약간의 3D 효과 */
+            border-radius: 16px;
+            padding: 15px; /* 패딩 약간 줄임 (글자 길어질 것에 대비) */
             text-align: center;
             cursor: pointer;
             transition: all 0.1s ease;
-            box-shadow: 0 3px 7px rgba(0,0,0,0.07); /* 그림자 진하게 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 90px; /* 최소 높이 늘림 */
+            min-height: 80px; /* 최소 높이 약간 줄임 */
             user-select: none;
-            font-weight: bold; /* 폰트 굵게 */
-            font-size: 1.1em; /* 폰트 크기 키움 */
+            font-weight: 500;
+            font-size: 1.05em;
             word-break: keep-all; /* 단어 단위 줄바꿈 */
-            line-height: 1.4; /* 줄 간격 조절 */
         }
 
         .card:hover:not(.matched):not(.selected) {
-            border-color: #b0b0b0; /* 호버 시 테두리 색상 진하게 */
-            background-color: #f9f9f9; /* 호버 시 배경색 약간 변경 */
+            border-color: #aaa;
+            background-color: #fafafa;
         }
 
         /* 선택된 카드 스타일 (메인 컬러 반영) */
@@ -144,7 +137,7 @@
             background-color: var(--main-color-light);
             border-color: var(--main-color);
             color: var(--main-color-active);
-            box-shadow: 0 5px 12px rgba(0, 128, 255, 0.2); /* 푸른색 그림자 진하게 */
+            box-shadow: 0 4px 10px rgba(0, 128, 255, 0.15);
         }
 
         /* 매칭된 카드 스타일 (투명해지며 클릭 불가) */
@@ -158,64 +151,52 @@
         /* 틀렸을 때 흔들리는 애니메이션 (유지) */
         .card.incorrect {
             animation: shake 0.4s ease-in-out;
-            border-color: #ffb0b0; /* 테두리 색상 조정 */
+            border-color: #ffc1c1;
             background-color: var(--incorrect-bg);
             color: var(--incorrect-color);
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-7px); } /* 흔들림 강도 피벗 */
-            40%, 80% { transform: translateX(7px); } /* 흔들림 강도 피벗 */
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
         }
 
         /* 제목 카드와 작가 카드를 시각적으로 약간 다르게 구분 (유지) */
         .card[data-type="title"] {
-            color: #1a1a1a; /* 색상 진하게 */
+            color: #222;
         }
         .card[data-type="author"] {
-            color: #4d4d4d; /* 색상 연하게 */
+            color: #555;
             font-style: italic;
         }
 
         /* 결과 메시지 스타일 (메인 컬러 반영) */
         #result-screen h2 {
             color: var(--main-color);
-            margin-bottom: 15px; /* 여백 늘림 */
-            font-size: 2.5em; /* 폰트 크기 키움 */
+            margin-bottom: 10px;
+            font-size: 2em;
         }
         #result-screen p {
             color: var(--text-color-secondary);
-            margin-bottom: 40px; /* 여백 늘림 */
-            font-size: 1.3em; /* 폰트 크기 키움 */
+            margin-bottom: 30px;
+            font-size: 1.2em;
         }
 
-        /* --- 반응형 레이아웃: PC와 같은 넓은 화면에서는 4열 배치로 변경 --- */
-        @media (min-width: 650px) {
+        /* 반응형 레이아웃: 화면이 작아지면 2열로 변경 */
+        @media (max-width: 600px) {
             #game-board {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
             .card {
-                padding: 22px;
-                min-height: 100px;
-                font-size: 1.15em;
-                border-radius: 20px;
+                padding: 12px;
+                min-height: 60px;
+                font-size: 0.95em;
+                border-radius: 12px;
             }
-        }
-
-        /* 화면이 아주 작을 때 타이틀 크기 조절 */
-        @media (max-width: 450px) {
-            h1 {
-                font-size: 2em;
-            }
-            .description {
-                font-size: 1em;
-            }
-            .card {
-                padding: 15px;
-                min-height: 80px;
-                font-size: 1em;
-                border-radius: 16px;
+            #result-screen h2 {
+                font-size: 1.5em;
             }
         }
     </style>
@@ -224,7 +205,7 @@
 
     <div id="start-screen" class="screen">
         <h1>책 & 작가 맞추기</h1>
-        <p class="description"><strong>사락 문학 퀴즈</strong><br>중복 없이 고유한 항목들을 매칭해 보세요.</p>
+        <p class="description">사락 문학 퀴즈<br>항목들을 매칭해 보세요.</p>
         <button id="start-btn" class="btn-primary">게임 시작</button>
     </div>
 
@@ -401,4 +382,54 @@
             }
 
             const selectedTitle = titleCard.dataset.text;
-            const selectedAuthor =
+            const selectedAuthor = authorCard.dataset.text;
+            const correctAuthor = bookToAuthorMap[selectedTitle]; // 선택된 제목의 정답 작가 찾기
+
+            // --- 짝이 맞는지 확인 조건 (새로운 로직) ---
+            // 선택된 제목의 정답 작가와 선택된 작가 카드의 텍스트가 일치해야 함
+            if (selectedAuthor === correctAuthor) {
+                // 매칭 성공
+                setTimeout(() => {
+                    titleCard.classList.replace('selected', 'matched');
+                    authorCard.classList.replace('selected', 'matched');
+                    
+                    resetSelection();
+                    matchedTitlesCount++;
+
+                    // 모든 고유한 책 제목을 다 맞췄는지 확인 (작가 카드가 아님)
+                    if (matchedTitlesCount === bookTitles.length) {
+                        endGame();
+                    }
+                }, 300); 
+            } else {
+                // 매칭 실패
+                setTimeout(() => {
+                    firstSelectedCard.classList.add('incorrect');
+                    secondSelectedCard.classList.add('incorrect');
+
+                    setTimeout(() => {
+                        if(firstSelectedCard) firstSelectedCard.classList.remove('selected', 'incorrect');
+                        if(secondSelectedCard) secondSelectedCard.classList.remove('selected', 'incorrect');
+                        resetSelection();
+                    }, 400); 
+                }, 100);
+            }
+        }
+
+        // 7. 선택 상태 초기화 함수
+        function resetSelection() {
+            firstSelectedCard = null;
+            secondSelectedCard = null;
+            isChecking = false; // 클릭 방지 해제
+        }
+
+        // 8. 게임 종료 함수
+        function endGame() {
+            setTimeout(() => {
+                showScreen(resultScreen);
+            }, 800); 
+        }
+
+    </script>
+</body>
+</html>
